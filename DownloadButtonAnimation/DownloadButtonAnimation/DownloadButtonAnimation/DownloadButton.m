@@ -18,6 +18,7 @@
 
     self = [super initWithFrame:frame];
     if (self) {
+        
         [self setUpSomething];
     }
     return self;
@@ -27,6 +28,7 @@
 
     self = [super initWithCoder:aDecoder];
     if (self) {
+        
         [self setUpSomething];
     }
     return self;
@@ -41,8 +43,12 @@
     return self;
 }
 
-//添加响应手势
+//添加响应手势以及设置外观
 -(void)setUpSomething{
+    self.backgroundColor = [UIColor redColor];
+    self.layer.cornerRadius = self.frame.size.height/2;
+    self.clipsToBounds = YES;
+    
     UITapGestureRecognizer *tapGes = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(tapped:)];
     [self addGestureRecognizer:tapGes];
 }
@@ -92,6 +98,7 @@
     
     if ([animation isEqual:[self.layer animationForKey:@"cornerRadiusShrinkAnim"]]) {
         
+        //圆形变成进度条,然后调用进度条加载的动画[self progressBarAnimation]
         [UIView animateWithDuration:0.6f delay:0.0f usingSpringWithDamping:0.6 initialSpringVelocity:0.0 options:UIViewAnimationOptionCurveEaseOut animations:^{
             self.bounds = CGRectMake(0, 0, _progressBarWidth, _progressBarHeight);
         } completion:^(BOOL finished) {
@@ -107,7 +114,7 @@
         } completion:^(BOOL finished) {
             [self.layer removeAllAnimations];
             [self checkAnimation];
-            //-----
+
             animating = NO;
         }];
         
@@ -115,6 +122,8 @@
 
 }
 
+
+//“当进度条动画走完后，我们先让进度条做一个透明度到 0 的动画，之后立马同时开始一个 cornerRadius 动画和一个 bounds 动画，让进度条恢复到圆形状态。”
 -(void)animationDidStop:(CAAnimation *)animation finished:(BOOL)flag{
     
     if ([[animation valueForKey:@"animationName"]isEqualToString:@"progressBarAnimation"]){
@@ -146,8 +155,10 @@
 }
 
 
+//加载进度的动画
 -(void)progressBarAnimation{
     
+    //这类进度的动画，都是用的 strokeEnd 属性。而 strokeEnd 不是 CALayer 的属性，而是其子类 CAShapeLayer 的一个特有的属性。所以我们必须创建一个 CAShapeLayer. 注意path是必须赋值的参数
     CAShapeLayer *progressLayer = [CAShapeLayer layer];
     UIBezierPath *path = [UIBezierPath bezierPath];
     [path moveToPoint:CGPointMake(_progressBarHeight/2, self.bounds.size.height/2)];
@@ -156,6 +167,10 @@
     progressLayer.path = path.CGPath;
     progressLayer.strokeColor = [UIColor whiteColor].CGColor;
     progressLayer.lineWidth = _progressBarHeight-6;
+    //“lineCap 指的是线段的线帽”
+    //kCALineCapButt: 默认格式，不附加任何形状;
+    //kCALineCapRound: 在线段头尾添加半径为线段 lineWidth 一半的半圆；
+    //kCALineCapSquare: 在线段头尾添加半径为线段 lineWidth 一半的矩形
     progressLayer.lineCap = kCALineCapRound;
     //设置了kCALineCapRound 那么圆角弧度自动被设为 lineWidth/2 .所以要想进度条距离外围的间距相等，起始点的 x 坐标应该等于满足公式 x=lineWidth/2+space; ∵ lineWidth ＝ _progressBarHeight-space*2 ∴x = height/2.与 linewidth 是多少并没有关系
     [self.layer addSublayer:progressLayer];

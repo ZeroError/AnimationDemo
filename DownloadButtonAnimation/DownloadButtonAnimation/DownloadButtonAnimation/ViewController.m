@@ -7,8 +7,10 @@
 //
 
 #import "ViewController.h"
-
+#import "DownloadButton.h"
 @interface ViewController ()
+
+@property (strong, nonatomic) DownloadButton *downloadButton;
 
 @end
 
@@ -16,7 +18,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    self.downloadButton = [[DownloadButton alloc] initWithFrame:CGRectMake(100, 100, 150, 150)];
+    self.downloadButton.progressBarWidth  = 200;
+    self.downloadButton.progressBarHeight = 30;
+    [self.view addSubview:self.downloadButton];
+
 }
 
 
